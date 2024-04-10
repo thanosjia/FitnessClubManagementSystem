@@ -70,3 +70,11 @@ CREATE TABLE fitness_goals (
     goal_value INT NOT NULL,
     FOREIGN KEY (member_id) REFERENCES members(member_id)
 );
+
+CREATE TABLE payments (
+    payment_id SERIAL PRIMARY KEY,
+    member_id INT,
+    payment_date DATE NOT NULL,
+    next_payment_date DATE NOT NULL
+    FOREIGN KEY (member_id) REFERENCES members(member_id)
+);
