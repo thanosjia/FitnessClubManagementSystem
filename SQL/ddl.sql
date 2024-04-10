@@ -4,7 +4,7 @@ CREATE TABLE members (
     last_name TEXT NOT NULL,
     user_name TEXT NOT NULL UNIQUE,
     pwd TEXT NOT NULL,
-    membership_status BOOLEAN,
+    membership_status BOOLEAN NOT NULL DEFAULT FALSE,
     payment_method TEXT NOT NULL
 );
 
@@ -13,8 +13,7 @@ CREATE TABLE trainers (
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     user_name TEXT NOT NULL UNIQUE,
-    pwd TEXT NOT NULL,
-    available_times TEXT NOT NULL
+    pwd TEXT NOT NULL
 );
 
 CREATE TABLE admins (
@@ -69,14 +68,5 @@ CREATE TABLE fitness_goals (
     member_id INT,
     goal_type TEXT NOT NULL,
     goal_value INT NOT NULL,
-    FOREIGN KEY (member_id) REFERENCES members(member_id)
-);
-
-CREATE TABLE health_metrics (
-    metric_id SERIAL PRIMARY KEY,
-    member_id INT,
-    metric_type TEXT NOT NULL,
-    metric_value INT NOT NULL,
-    recorded_date DATE NOT NULL,
     FOREIGN KEY (member_id) REFERENCES members(member_id)
 );
