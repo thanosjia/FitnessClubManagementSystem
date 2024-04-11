@@ -3,7 +3,14 @@ from psycopg2 import OperationalError
 
 def create_connection():
     try:
-        conn = psycopg2.connect()
+        conn = psycopg2.connect(
+            dbname="FitnessClub",
+            user="postgres",
+            password="postgres",
+            host="localhost",
+            port="5432"
+        )
+        print("Connection to the database successful")
         return conn
     except OperationalError as e:
         print(f"Error '{e}' occured")
