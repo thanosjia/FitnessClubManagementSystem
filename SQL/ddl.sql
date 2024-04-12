@@ -19,8 +19,6 @@ CREATE TABLE trainers (
 
 CREATE TABLE admins (
     admin_id SERIAL PRIMARY KEY,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
     user_name TEXT NOT NULL UNIQUE,
     pwd TEXT NOT NULL
 );
