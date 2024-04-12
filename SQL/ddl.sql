@@ -5,8 +5,7 @@ CREATE TABLE members (
     user_name TEXT NOT NULL UNIQUE,
     email TEXT NOT NULL,
     pwd TEXT NOT NULL,
-    membership_status BOOLEAN NOT NULL DEFAULT FALSE,
-    payment_method TEXT NOT NULL
+    membership_status BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE trainers (
@@ -62,6 +61,16 @@ CREATE TABLE fitness_classes (
     FOREIGN KEY (class_room) REFERENCES rooms(room_id)
 );
 
+CREATE TABLE class_registrations (
+    registration_id SERIAL PRIMARY KEY,
+    class_id INT NOT NULL,
+    member_id INT NOT NULL,
+    registration_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    FOREIGN KEY (class_id) REFERENCES fitness_classes(class_id),
+    FOREIGN KEY (member_id) REFERENCES members(member_id),
+    UNIQUE (class_id, member_id)
+);
+
 CREATE TABLE fitness_goals (
     goal_id SERIAL PRIMARY KEY,
     member_id INT,
@@ -73,6 +82,7 @@ CREATE TABLE fitness_goals (
 CREATE TABLE payments (
     payment_id SERIAL PRIMARY KEY,
     member_id INT,
+    payment_method TEXT NOT NULL,
     payment_date DATE NOT NULL,
     next_payment_date DATE NOT NULL,
     FOREIGN KEY (member_id) REFERENCES members(member_id)
