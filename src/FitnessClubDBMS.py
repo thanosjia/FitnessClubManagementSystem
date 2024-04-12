@@ -16,14 +16,34 @@ def create_connection():
         print(f"Error '{e}' occured")
         return None
 
-def register_user():
-    return None
+def register_user(first_name, last_name, user_name, email, pwd, payment_method):
+    conn = create_connection()
+    cursor = conn.cursor
+    try:
+        cursor.execute("INSERT INTO members (first_name, last_name, user_name, email, pwd, payment_method) VALUES (%s, %s, %s, %s, %s, %s)", (first_name, last_name, user_name, email, pwd, payment_method))
+        conn.commit()
+        print("New Member registration Successful")
+    except Exception as e:
+        print(f"Error '{e}' occured")
+    finally:
+        cursor.close()
+        conn.close()
 
 def login():
     return None
 
-def changeUsername():
-    return None
+def changeUsername(member_id, new_user_name):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE members SET user_name = %s WHERE member_id = %s", (new_user_name, member_id))
+        conn.commit()
+        print("Username updated successfully")
+    except Exception as e:
+        print(f"Error '{e}' occurred")
+    finally:
+        cursor.close()
+        conn.close()
 
 def changePassword():
     return None

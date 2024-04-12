@@ -3,6 +3,7 @@ CREATE TABLE members (
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     user_name TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL,
     pwd TEXT NOT NULL,
     membership_status BOOLEAN NOT NULL DEFAULT FALSE,
     payment_method TEXT NOT NULL
