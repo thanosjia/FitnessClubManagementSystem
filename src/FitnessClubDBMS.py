@@ -1,5 +1,6 @@
 import psycopg2
 from psycopg2 import OperationalError
+from datetime import datetime, timedelta
 
 def create_connection():
     try:
@@ -124,17 +125,58 @@ def changeEmail(member_id, new_email):
         cursor.close()
         conn.close()
 
-def changeInfo(weight):
-    return None
+def newGoal(member_id, goal_type, goal_value):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("INSERT INTO fitness_goals (member_id, goal_type, goal_value) VALUES (%s, %s, %s)", (member_id, goal_type, goal_value))
+        conn.commit()
+        print("New goal added successfully")
+    except Exception as e:
+        print(f"Error '{e}' occurred")
+    finally:
+        cursor.close()
+        conn.close()
 
-def newGoal():
-    return None
+def changeGoal(goal_id, new_goal_type, new_goal_value):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE fitness_goals SET goal_type = %s, goal_value = %s WHERE goal_id = %s", (new_goal_type, new_goal_value, goal_id))
+        conn.commit()
+        print("Goal updated successfully")
+    except Exception as e:
+        print(f"Error '{e}' occurred")
+    finally:
+        cursor.close()
+        conn.close()
 
-def changeGoal():
-    return None
+def deleteGoal(goal_id):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM fitness_goals WHERE goal_id = %s", (goal_id,))
+        conn.commit()
+        print("Goal deleted successfully")
+    except Exception as e:
+        print(f"Error '{e}' occurred")
+    finally:
+        cursor.close()
+        conn.close()
 
-def getGoals():
-    return None
+def getGoals(member_id):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT goal_id, goal_type, goal_value FROM fitness_goals WHERE member_id = %s", (member_id,))
+        goals = cursor.fetchall()
+        print(goals)
+    except Exception as e:
+        print(f"Error '{e}' occurred")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
 
 def getExerciseRoutines():
     return None
@@ -142,8 +184,32 @@ def getExerciseRoutines():
 def getAchievements():
     return None
 
+def setStats(member_id, height, mass):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("INSERT INTO member_stats (member_id, height, mass) VALUES (%s, %s, %s)", (member_id, height, mass))
+        conn.commit()
+        print("Stats set")
+    except Exception as e:
+        print(f"Error '{e}' occured")
+    finally:
+        cursor.close()
+        conn.close()
+
 def getStats(member_id):
-    return None
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT height, mass FROM member_stats WHERE member_id = %s", (member_id,))
+        stats = cursor.fetchall()
+        print(stats)
+    except Exception as e:
+        print(f"Error '{e}' occurred")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
 
 def newSession(trainer_id, member_id, session_date, session_time):
     conn = create_connection()
@@ -249,17 +315,127 @@ def leaveClass(class_id, member_id):
         cursor.close()
         conn.close()
 
-def setAvailability():
-    return None
+def setAvailability(trainer_id, available_date, available_time):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO trainer_availability (trainer_id, available_date, available_time)
+            VALUES (%s, %s, %s)
+        """, (trainer_id, available_date, available_time))
+        conn.commit()
+        print("Availability set successfully")
+    except Exception as e:
+        print(f"Error '{e}' occurred")
+    finally:
+        cursor.close()
+        conn.close()
 
-def getMemberProfile():
-    return None
+def getMemberProfile(member_id):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT member_id, first_name, last_name, user_name, email, membership_status
+            FROM members
+            WHERE member_id = %s
+        """, (member_id,))
+        member_details = cursor.fetchone()
+        if member_details:
+            print("Member Profile:")
+            print("Member ID: ", member_details[0])
+            print("First Name: ", member_details[1])
+            print("Last Name: ", member_details[2])
+            print("Username: ", member_details[3])
+            print("Email: ", member_details[4])
+            print("Membership Status: ", "Active" if member_details[5] else "Inactive")
+        else:
+            print("No member found with ID", member_id)
+    except Exception as e:
+        print(f"Error '{e}' occurred")
+    finally:
+        cursor.close()
+        conn.close()
 
-def viewMaintenance():
-    return None
+def viewEquipment():
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT * FROM equipment")
+        equipment = cursor.fetchall()
+        print(equipment)
+    except Exception as e:
+        print(f"Error '{e}' occurred")
+    finally:
+        cursor.close()
+        conn.close()
 
-def processPayment():
-    return None
+def changeEquipmentStatus(equipment_id, new_equipment_status):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE equipment SET new_equipment_status = %s WHERE equipment_id = %s", (new_equipment_status, equipment_id))
+    except Exception as e:
+        print(f"Error '{e}' occurred")
+    finally:
+        cursor.close()
+        conn.close()
+
+def processPayment(member_id):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        # Check the current status of the member
+        cursor.execute("SELECT membership_status FROM members WHERE member_id = %s", (member_id,))
+        status = cursor.fetchone()
+        
+        if status is None:
+            print("No member found with ID", member_id)
+            return
+
+        if status[0]:  # membership_status is True
+            # Member is already active, fetch the most recent payment's next payment date
+            cursor.execute("""
+                SELECT next_payment_date FROM payments
+                WHERE member_id = %s
+                ORDER BY payment_date DESC
+                LIMIT 1
+            """, (member_id,))
+            next_payment_date = cursor.fetchone()
+            if next_payment_date:
+                print("This member has already paid.")
+                print("Next payment date is:", next_payment_date[0])
+            else:
+                print("No payment records found, but the member is marked as active.")
+        else:
+            # Process the payment and update membership status and payments table
+            today = datetime.now().date()
+            next_payment_date = today + timedelta(days=30)
+            
+            # Update member status
+            cursor.execute("""
+                UPDATE members
+                SET membership_status = TRUE
+                WHERE member_id = %s
+            """, (member_id,))
+            
+            # Insert new payment record
+            cursor.execute("""
+                INSERT INTO payments (member_id, payment_date, next_payment_date, payment_method)
+                VALUES (%s, %s, %s, 'Default Method')  -- Assuming a default method for simplification
+            """, (member_id, today, next_payment_date))
+            
+            conn.commit()
+            print("Payment processed successfully.")
+            print("Membership activated.")
+            print("Next payment date is:", next_payment_date)
+
+    except Exception as e:
+        print(f"Error '{e}' occurred")
+        conn.rollback()  # Rollback in case of error
+    finally:
+        cursor.close()
+        conn.close()
 
 def login():
     return None

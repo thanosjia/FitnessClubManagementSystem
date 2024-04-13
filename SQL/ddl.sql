@@ -32,6 +32,14 @@ CREATE TABLE training_sessions (
     FOREIGN KEY (member_id) REFERENCES members(member_id)
 );
 
+CREATE TABLE trainer_availability (
+    availability_id SERIAL PRIMARY KEY,
+    trainer_id INT NOT NULL,
+    available_date DATE NOT NULL,
+    available_time TIME NOT NULL,
+    FOREIGN KEY (trainer_id) REFERENCES trainers(trainer_id)
+);
+
 CREATE TABLE rooms (
     room_id SERIAL PRIMARY KEY,
     room_name TEXT NOT NULL,
@@ -77,5 +85,13 @@ CREATE TABLE payments (
     payment_method TEXT NOT NULL,
     payment_date DATE NOT NULL,
     next_payment_date DATE NOT NULL,
+    FOREIGN KEY (member_id) REFERENCES members(member_id)
+);
+
+CREATE TABLE member_stats (
+    stats_id SERIAL PRIMARY KEY,
+    member_id INT,
+    height INT,
+    mass INT,
     FOREIGN KEY (member_id) REFERENCES members(member_id)
 );
