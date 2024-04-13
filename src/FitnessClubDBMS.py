@@ -127,7 +127,7 @@ def changeEmail(member_id, new_email):
 def changeInfo(weight):
     return None
 
-def establishGoal():
+def newGoal():
     return None
 
 def changeGoal():
@@ -145,18 +145,48 @@ def getAchievements():
 def getStats(member_id):
     return None
 
-def newSession():
-    return None
+def newSession(trainer_id, member_id, session_date, session_time):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("INSERT INTO training_sessions (trainer_id, member_id, session_date, session_time) VALUES (%s, %s, %s, %s)", (trainer_id, member_id, session_date, session_time))
+        conn.commit()
+        print("New training session created")
+    except Exception as e:
+        print(f"Error '{e}' occured")
+    finally:
+        cursor.close()
+        conn.close()
 
-def rescheduleSession():
-    return None
+def rescheduleSession(session_id, new_session_date, new_session_time):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE training_session SET session_date = %s, session_time = %s WHERE session_id = %s", (new_session_date, new_session_time, session_id))
+        conn.commit()
+        print("Training session rescheduled successfully")
+    except Exception as e:
+        print(f"Error '{e}' occurred")
+    finally:
+        cursor.close()
+        conn.close()
 
-def cancelSession():
-    return None
+def cancelSession(session_id):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM training_sessions WHERE session_id = %s", (session_id))
+        conn.commit()
+        print("Training session cancelled")
+    except Exception as e:
+        print(f"Error '{e}' occurred")
+    finally:
+        cursor.close()
+        conn.close()
 
 def newClass(class_name, class_room, class_date, class_time):
     conn = create_connection()
-    cursor = conn.cursor
+    cursor = conn.cursor()
     try:
         cursor.execute("INSERT INTO fitness_classes (class_name, class_room, class_date, class_time) VALUES (%s, %s, %s, %s)", (class_name, class_room, class_date, class_time))
         conn.commit()
@@ -184,7 +214,7 @@ def deleteClass(class_id):
     conn = create_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("DELETE FROM fitness_classes WHERE class_id = %s", (class_id,))
+        cursor.execute("DELETE FROM fitness_classes WHERE class_id = %s", (class_id))
         conn.commit()
         print("Fitness class deleted")
     except Exception as e:
@@ -225,15 +255,6 @@ def setAvailability():
 def getMemberProfile():
     return None
 
-def bookRoom():
-    return None
-
-def changeBooking():
-    return None
-
-def deleteBooking():
-    return None
-
 def viewMaintenance():
     return None
 
@@ -243,10 +264,46 @@ def processPayment():
 def login():
     return None
 
-def loginMenu():
-    return None
+def startMenu():
+    print("\nWelcome To The Fitness Club!")
+    print("Please choose an option (enter the number):")
+    print("1. Login")
+    print("2. Register")
+    print("3. Exit")
 
-def mainMenu():
-    return None
+def memberMenu():
+    print("\nWelcome To The Fitness Club!")
+    print("Please choose an option (enter the number):")
+    print("1. View Goals")
+    print("2. Book Training Session")
+    print("3. Class Sign Up/Leave")
+    print("4. Change Info")
+    print("5. Exit")
+
+def trainerMenu():
+    print("\nFitness Club Trainer Menu")
+    print("Please choose an option (enter the number):")
+    print("1. View Training Sessions")
+    print("2. Change Availability")
+    print("3. Search Members")
+    print("4. Change Info")
+    print("5. Exit")
+
+def adminMenu():
+    print("\nFitness Club Administrator Menu")
+    print("Please choose an option (enter the number):")
+    print("1. Room Booking Management")
+    print("2. Equipment Maintenance Monitoring")
+    print("3. Update Class Schedules")
+    print("4. Billing and Payment Processing")
+    print("5. Change Info")
+    print("6. Exit")
+
+def changeInfoMenu():
+    print("\nSelect the information you would like to change (enter the number):")
+    print("1. Username")
+    print("2. Password")
+    print("3. Email") # For members only
+    print("4. Return to Main Menu")
 
 # main

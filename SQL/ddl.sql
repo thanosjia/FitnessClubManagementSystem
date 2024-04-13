@@ -38,14 +38,6 @@ CREATE TABLE rooms (
     room_capacity INT NOT NULL
 );
 
-CREATE TABLE room_bookings (
-    booking_id SERIAL PRIMARY KEY,
-    room_id INT,
-    booking_date DATE NOT NULL,
-    booking_time TIME NOT NULL,
-    FOREIGN KEY (room_id) REFERENCES rooms(room_id)
-);
-
 CREATE TABLE equipment (
     equipment_id SERIAL PRIMARY KEY,
     equipment_name TEXT NOT NULL,
