@@ -49,7 +49,7 @@ CREATE TABLE rooms (
 CREATE TABLE equipment (
     equipment_id SERIAL PRIMARY KEY,
     equipment_name TEXT NOT NULL,
-    equipment_status TEXT NOT NULL
+    maintenance_status BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE fitness_classes (
