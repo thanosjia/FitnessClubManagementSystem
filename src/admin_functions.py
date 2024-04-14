@@ -94,7 +94,7 @@ def billingPaymentProcessing():
         print("\nBilling and Payment Processing")
         print("1. Search Members")
         print("2. Process Payment Status")
-        print("3. View All Payments")
+        print("3. View Member Payments")
         print("4. Return to Main Menu")
 
         choice = input("Selected: ")
@@ -206,12 +206,13 @@ def viewAllEquipment():
     conn = create_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("SELECT equipment_id, equipment_name, equipment_status FROM equipment")
+        cursor.execute("SELECT equipment_id, equipment_name, maintenance_status FROM equipment")
         equipment = cursor.fetchall()
         if equipment:
             print("All Equipment:")
             for eq in equipment:
-                print(f"Equipment ID: {eq[0]}, Name: {eq[1]}, Status: {eq[2]}")
+                status = "Under Maintenance" if eq[2] else "Not Under Maintenance"
+                print(f"Equipment ID: {eq[0]}, Name: {eq[1]}, Status: {status}")
         else:
             print("No equipment found.")
     except Exception as e:
@@ -224,12 +225,12 @@ def viewMaintenanceEquipment():
     conn = create_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("SELECT equipment_id, equipment_name, equipment_status FROM equipment WHERE equipment_status = 'maintenance'")
+        cursor.execute("SELECT equipment_id, equipment_name, maintenance_status FROM equipment WHERE maintenance_status = TRUE")
         equipment = cursor.fetchall()
         if equipment:
             print("Equipment Under Maintenance:")
             for eq in equipment:
-                print(f"Equipment ID: {eq[0]}, Name: {eq[1]}, Status: {eq[2]}")
+                print(f"Equipment ID: {eq[0]}, Name: {eq[1]}, Status: 'Under Maintenance'")
         else:
             print("No equipment under maintenance.")
     except Exception as e:
@@ -243,13 +244,14 @@ def changeEquipmentStatus():
     conn = create_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("SELECT equipment_status FROM equipment WHERE equipment_id = %s", (equipment_id,))
+        cursor.execute("SELECT maintenance_status FROM equipment WHERE equipment_id = %s", (equipment_id,))
         status = cursor.fetchone()
         if status:
-            new_status = 'active' if status[0] == 'maintenance' else 'maintenance'
-            cursor.execute("UPDATE equipment SET equipment_status = %s WHERE equipment_id = %s", (new_status, equipment_id))
+            new_status = not status[0]  # Toggle the boolean value
+            cursor.execute("UPDATE equipment SET maintenance_status = %s WHERE equipment_id = %s", (new_status, equipment_id))
             conn.commit()
-            print(f"Equipment status changed to {new_status}")
+            status_text = "Under Maintenance" if new_status else "Not Under Maintenance"
+            print(f"Equipment status changed to {status_text}")
         else:
             print("Equipment not found.")
     except Exception as e:
@@ -260,21 +262,37 @@ def changeEquipmentStatus():
 
 def processMemberPayment():
     member_id = input("Enter the member ID to process payment: ")
-    payment_method = input("Enter payment method: ")
-    today = datetime.now().date()
-    next_payment_date = today + timedelta(days=30)
     conn = create_connection()
     cursor = conn.cursor()
+    
     try:
+        # Check if the member exists
+        cursor.execute("SELECT membership_status FROM members WHERE member_id = %s", (member_id,))
+        member = cursor.fetchone()
+        
+        if not member:
+            print("No member found with ID", member_id)
+            return  # Exit the function if no member found
+
+        # Proceed if member exists
+        payment_method = input("Enter payment method: ")
+        today = datetime.now().date()
+        next_payment_date = today + timedelta(days=30)
+        
+        # Update member status to active
         cursor.execute("UPDATE members SET membership_status = TRUE WHERE member_id = %s", (member_id,))
+        
+        # Insert new payment record
         cursor.execute("""
         INSERT INTO payments (member_id, payment_method, payment_date, next_payment_date)
         VALUES (%s, %s, %s, %s)
         """, (member_id, payment_method, today, next_payment_date))
         conn.commit()
         print("Payment processed and membership activated.")
+        
     except Exception as e:
         print(f"Error occurred: {e}")
+        conn.rollback()  # Ensure you rollback in case of any error
     finally:
         cursor.close()
         conn.close()
@@ -304,14 +322,14 @@ def searchMembers():
     cursor = conn.cursor()
     try:
         cursor.execute("""
-        SELECT first_name, last_name, user_name, email, membership_status
+        SELECT member_id, first_name, last_name, user_name, email, membership_status
         FROM members
         WHERE user_name ILIKE %s OR first_name ILIKE %s OR last_name ILIKE %s
         """, (f'%{search_query}%', f'%{search_query}%', f'%{search_query}%'))
         members = cursor.fetchall()
         print("Search Results:")
         for member in members:
-            print(f"Name: {member[0]} {member[1]}, Username: {member[2]}, Email: {member[3]}, Status: {'Active' if member[4] else 'Inactive'}")
+            print(f"Member ID: {member[0]}, Name: {member[1]} {member[2]}, Username: {member[3]}, Email: {member[4]}, Status: {'Active' if member[5] else 'Inactive'}")
     except Exception as e:
         print(f"Error occurred: {e}")
     finally:
