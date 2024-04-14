@@ -2,7 +2,9 @@ Fitness Club Database Management System
 Thanos Jia
 101189709
 
-Unfortunately I wasn't able to design an ER model/schema or record a video demonstration in time.
+Unfortunately I wasn't able to design an ER model/schema in time.
+
+Video Demo Link: https://youtu.be/OpIwJlWw1NY
 
 Here are instructions on how to run FitnessClubDBMS:
 
